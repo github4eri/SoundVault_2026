@@ -1,0 +1,4 @@
+.env
+soundvault.db
+__pycache__/
+uploads/

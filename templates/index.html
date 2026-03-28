@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundVault 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-12 border-b border-slate-700 pb-6">
+            <h1 class="text-4xl font-bold text-cyan-400">🎧 SoundVault</h1>
+            <p class="text-slate-400">Your AI-Powered Library</p>
+        </header>
+
+        <section class="bg-slate-800 p-6 rounded-xl shadow-xl mb-12 border border-slate-700">
+            <h2 class="text-xl font-semibold mb-4">Upload New Audio</h2>
+            <form action="/upload" method="post" enctype="multipart/form-data" class="space-y-4">
+                <input type="file" name="file" accept="audio/*" required 
+                       class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-500 file:text-white hover:file:bg-cyan-600 cursor-pointer">
+                
+                <div class="flex items-center space-x-3">
+                    <input type="checkbox" name="is_free" id="is_free" checked class="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-500">
+                    <label for="is_free" class="text-sm font-medium">Royalty Free / Safe to Use</label>
+                </div>
+
+                <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded-lg transition duration-200">
+                    Process with Gemini AI
+                </button>
+            </form>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold mb-6">Your Collection</h2>
+            <div class="grid gap-6">
+                {% for sound in sounds %} 
+                <div class="bg-slate-800 border border-slate-700 p-5 rounded-lg flex flex-col md:flex-row items-center gap-6">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="{{ 'text-green-400' if sound.is_royalty_free else 'text-red-400' }} text-xs font-bold uppercase tracking-widest">
+                                {{ 'FREE' if sound.is_royalty_free else 'RESTRICTED' }}
+                            </span>
+                            <h3 class="text-lg font-bold">{{ sound.title }}</h3><form action="/delete/{{ sound.id }}" method="post" class="inline">
+                                   <button type="submit" onclick="return confirm('Are you sure you want to delete this sound?')" 
+                                           class="text-xs text-red-500 hover:text-red-400 font-bold ml-4">
+                                       [DELETE]
+                                   </button>
+                               </form>
+                        </div>
+                        <p class="text-sm text-slate-400 mb-4 italic">"{{ sound.ai_description }}"</p>
+                        
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="bg-slate-700 px-2 py-1 rounded text-xs text-cyan-300">{{ sound.ai_mood }}</span>
+                            {% for tag in sound.ai_tags.split(',') %}
+                            <span class="bg-slate-900 px-2 py-1 rounded text-xs text-slate-400">#{{ tag.strip(" '[]") }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <audio controls class="w-full h-8">
+                            <source src="/{{ sound.file_path }}" type="audio/mpeg">
+                        </audio>
+                    </div>
+                    <div class="text-right border-l border-slate-700 pl-6 hidden md:block">
+                        <p class="text-xs text-slate-500 uppercase">Duration</p>
+                        <p class="font-mono text-cyan-400">{{ sound.duration }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</body>
+</html>
