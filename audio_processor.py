@@ -27,15 +27,31 @@ async def analyze_audio_with_gemini(file_path):
     file_upload = client.files.upload(file=file_path)
 
     prompt = """
-    Listen to this audio. Provide a JSON response:
+    ROLE: Professional Sound Librarian.
+    TASK: Analyze the audio and provide technical metadata.
+    
+    GUIDELINES:
+    - tempo_rhythm: Describe speed and pattern (e.g., 'Fast/Driving', 'Slow/Steady').
+    - is_orchestrated: true if it's a full band/orchestra, false if it's a single instrument.
+    - main_instrument: Identify the dominant sound (e.g., 'Electric Guitar', 'Violin', 'Nature Sounds').
+    - has_vocals: true if any human singing or speaking is detected.
+    
+    Provide JSON:
     {
-      "title": "catchy name",
-      "mood": "one word vibe",
-      "instruments": "list of sounds",
-      "energy": 1-10,
-      "description": "1-sentence summary",
-      "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
-      "license_guess": "royalty-free or commercial"
+      "title": "Professional Title",
+      "mood": "Mood",
+      "instruments": ["list"],
+      "main_instrument": "Specific dominant instrument",
+      "is_orchestrated": true/false,
+      "has_vocals": true/false,
+      "tempo_rhythm": "Speed/Pattern",
+      "acoustic_type": "Type",
+      "is_environmental": true/false,
+      "music_genre": "Genre",
+      "origin_country": "Country",
+      "is_ai_generated": true/false,
+      "description": "Summary",
+      "tags": ["tag1", "tag2"]
     }
     """
 
