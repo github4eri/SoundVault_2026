@@ -36,6 +36,12 @@ async def analyze_audio_with_gemini(file_path):
     - main_instrument: Identify the dominant sound (e.g., 'Electric Guitar', 'Violin', 'Nature Sounds').
     - has_vocals: true if any human singing or speaking is detected.
     
+    SOURCE CATEGORIZATION:
+    1. If the sound is synthetic or AI-synthesized: set is_ai_generated to true.
+    2. If it is a recording of nature (wind, birds, water): set is_ai_generated to false AND is_environmental to true.
+    3. If it is a human performance (instruments, voice, footsteps): set is_ai_generated to false AND is_environmental to false.
+    4. "If the primary sound source is organic (Wind, Water, Animals), you MUST set is_environmental to true, even if a human is holding the microphone. Human Made is strictly for intentional human sounds like music, speech, or footsteps."
+    
     Provide JSON:
     {
       "title": "Professional Title",
@@ -46,6 +52,7 @@ async def analyze_audio_with_gemini(file_path):
       "has_vocals": true/false,
       "tempo_rhythm": "Speed/Pattern",
       "acoustic_type": "Type",
+      "is_ai_generated": true/false,
       "is_environmental": true/false,
       "music_genre": "Genre",
       "origin_country": "Country",

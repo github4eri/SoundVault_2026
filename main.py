@@ -23,29 +23,67 @@ if not os.path.exists("uploads"):
 
 # 3. ROUTES
 @app.get("/")
-async def home(request: Request, q: str = None, db: Session = Depends(database.get_db)):
-    # The 'Query' Logic
+async def home(
+    request: Request, 
+    q: str = None, 
+    ai_only: bool = False, 
+    human_only: bool = False,
+    nature_only: bool = False,
+    instrumental: bool = False,
+    vocals: bool = False,
+    db: Session = Depends(database.get_db)
+):
     query_obj = db.query(models.Sound)
 
+    # 1. Text Search
     if q:
         search_term = f"%{q}%"
-        # We search across Title, Mood, Genre, Country, and Tags simultaneously
         query_obj = query_obj.filter(
             or_(
                 models.Sound.title.ilike(search_term),
                 models.Sound.ai_mood.ilike(search_term),
                 models.Sound.music_genre.ilike(search_term),
-                models.Sound.origin_country.ilike(search_term),
-                models.Sound.ai_tags.ilike(search_term)
+                models.Sound.origin_country.ilike(search_term)
             )
         )
+
+    # 2. AI vs Human Filter
+    if ai_only:
+        query_obj = query_obj.filter(models.Sound.is_ai_generated == True)
+    
+    if nature_only:
+        query_obj = query_obj.filter(
+            models.Sound.is_ai_generated == False, 
+            models.Sound.is_environmental == True
+        )
+        
+    if human_only:
+        query_obj = query_obj.filter(
+            models.Sound.is_ai_generated == False, 
+            models.Sound.is_environmental == False
+        )
+
+    # 3. Vocals vs Instrumental Filter
+    if instrumental:
+        query_obj = query_obj.filter(models.Sound.has_vocals == False)
+    if vocals:
+        query_obj = query_obj.filter(models.Sound.has_vocals == True)
 
     sounds = query_obj.all()
     
     return templates.TemplateResponse(
-        request=request, 
-        name="index.html", 
-        context={"sounds": sounds, "query": q}
+    request=request, 
+    name="index.html", 
+    context={
+        "ai_only": ai_only,
+        "nature_only": nature_only,
+        "human_only": human_only,
+        "is_filtering_origin": any([ai_only, nature_only, human_only]),
+        "sounds": sounds, 
+        "query": q,
+        "instrumental": instrumental,
+        "vocals": vocals
+    }
     )
 
 @app.post("/upload")
