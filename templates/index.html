@@ -13,55 +13,71 @@
             <p class="text-slate-400">Your AI-Powered Library</p>
         </header>
     
+        <div class="flex items-center justify-start gap-3 mb-8 border-b border-slate-700/50 pb-6">
+            <div class="flex bg-slate-900/50 p-1 rounded-lg border border-slate-700">
+                <a href="/?lang=en" 
+                   class="px-4 py-1.5 rounded-md text-[10px] font-black transition-all 
+                   {{ 'bg-cyan-500 text-slate-900 shadow-[0_0_15px_rgba(6,182,212,0.4)]' if current_lang == 'en' else 'text-slate-500 hover:text-slate-300' }}">
+                   EN
+                </a>
+                
+                <a href="/?lang=jp" 
+                   class="px-4 py-1.5 rounded-md text-[10px] font-black transition-all 
+                   {{ 'bg-cyan-500 text-slate-900 shadow-[0_0_15px_rgba(6,182,212,0.4)]' if current_lang == 'jp' else 'text-slate-500 hover:text-slate-300' }}">
+                   JP
+                </a>
+            </div>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-    
             <aside class="md:col-span-1">
                 <form action="/" method="get" id="filter-form" class="space-y-6 bg-slate-800/50 p-6 rounded-2xl border border-slate-700 sticky top-8">
-                    
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Search</label>
-                        <input type="text" name="q" value="{{ query or '' }}" placeholder="Keywords..." 
-                               class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500">
-                    </div>
-        
-                    <hr class="border-slate-700">
-        
-                    <div class="mb-6 p-4 rounded-xl transition-all border {{ 'bg-cyan-500/5 border-cyan-500/30' if is_filtering_origin else 'border-transparent' }}">
-    
-                        <label class="block text-[10px] font-black uppercase tracking-widest mb-4 {{ 'text-cyan-400' if is_filtering_origin else 'text-slate-500' }}">
-                            Origin 
-                            {% if is_filtering_origin %}
-                                <span class="ml-1 text-cyan-500 animate-pulse">●</span>
-                            {% endif %}
+                    <input type="hidden" name="lang" value="{{ current_lang }}">
+                    <div class="w-full flex flex-col items-center px-2">
+                        <label class="w-full text-center text-[10px] font-black text-slate-500 uppercase mb-3 tracking-widest">
+                            {{ labels.search }}
                         </label>
-                    
-                        <div class="space-y-3">
-                            <label class="flex items-center gap-3 text-sm font-medium cursor-pointer">
-                                <input type="checkbox" name="ai_only" value="true" {{ 'checked' if ai_only }} onchange="this.form.submit()" class="...">
-                                <span>🤖 AI Synthesized</span>
-                            </label>
-                    
-                            <label class="flex items-center gap-3 text-sm font-medium cursor-pointer">
-                                <input type="checkbox" name="nature_only" value="true" {{ 'checked' if nature_only }} onchange="this.form.submit()" class="...">
-                                <span>🌿 Nature Made</span>
-                            </label>
-                    
-                            <label class="flex items-center gap-3 text-sm font-medium cursor-pointer">
-                                <input type="checkbox" name="human_only" value="true" {{ 'checked' if human_only }} onchange="this.form.submit()" class="...">
-                                <span>👤 Human Made</span>
-                            </label>
+                        
+                        <div class="w-full relative">
+                            <input type="text" name="q" value="{{ query or '' }}" 
+                                   placeholder="{{ labels.search_placeholder }}" 
+                                   class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-center focus:ring-2 focus:ring-cyan-500/50 transition-all outline-none placeholder:text-slate-600">
                         </div>
                     </div>
-        
+                    
+                    <hr class="border-slate-700/50">
+                    
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-3">Audio Type</label>
-                        <label class="flex items-center gap-2 text-sm cursor-pointer mb-2">
-                            <input type="checkbox" name="instrumental" value="true" {{ 'checked' if instrumental }} onchange="this.form.submit()" class="rounded border-slate-700 bg-slate-900 text-cyan-500">
-                            <span>🎸 Instrumental</span>
+                        <label class="block text-[10px] font-black uppercase mb-4 ...">
+                            {{ labels.filter_origin }} 
+                            {% if is_filtering_origin %}<span class="...">●</span>{% endif %}
                         </label>
-                        <label class="flex items-center gap-2 text-sm cursor-pointer">
-                            <input type="checkbox" name="vocals" value="true" {{ 'checked' if vocals }} onchange="this.form.submit()" class="rounded border-slate-700 bg-slate-900 text-cyan-500">
-                            <span>🎤 Vocals Present</span>
+                        
+                        <label class="flex items-center gap-3 text-sm cursor-pointer">
+                            <input type="checkbox" name="ai_only" ...>
+                            <span>{{ labels.ai_gen }}</span>
+                        </label>
+                        
+                        <label class="flex items-center gap-3 text-sm cursor-pointer">
+                            <input type="checkbox" name="nature_only" ...>
+                            <span>{{ labels.nature_made }}</span>
+                        </label>
+                        
+                        <label class="flex items-center gap-3 text-sm cursor-pointer">
+                            <input type="checkbox" name="human_only" ...>
+                            <span>{{ labels.human_made }}</span>
+                        </label>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase mb-4">{{ labels.audio_type }}</label>
+                        <label class="flex items-center gap-3 text-sm cursor-pointer">
+                            <input type="checkbox" name="instrumental" ...>
+                            <span>{{ labels.instrumental }}</span>
+                        </label>
+                        <label class="flex items-center gap-3 text-sm cursor-pointer">
+                            <input type="checkbox" name="vocals" ...>
+                            <span>{{ labels.vocals }}</span>
                         </label>
                     </div>
         
@@ -103,6 +119,21 @@
                     </form>
                 </section>
         
+                <div class="mb-8 flex items-center justify-between border-b border-slate-700/50 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-100 tracking-tight">
+                            Sound Library
+                        </h2>
+                        <p class="text-xs text-slate-500 font-medium">Exploring the Acoustic Vault</p>
+                    </div>
+                    
+                    <div class="bg-cyan-500/10 border border-cyan-500/30 px-4 py-2 rounded-xl">
+                        <span class="text-xs font-black text-cyan-400 uppercase tracking-widest">
+                            {{ sounds|length }} {{ labels.artifacts_found if sounds|length != 1 else labels.artifact_singular }}
+                        </span>
+                    </div>
+                </div>
+
                 <section>
                     <h2 class="text-2xl font-bold mb-6">Your Collection</h2>
                     <div class="grid gap-6">

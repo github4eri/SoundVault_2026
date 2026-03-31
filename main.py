@@ -8,6 +8,43 @@ import models, database, audio_processor
 import json
 from sqlalchemy import or_ # This allows to search "Title OR Genre OR Country"
 
+# 🌎 THE BILINGUAL MAP
+TRANSLATIONS = {
+    "en": {
+        "title": "SoundVault",
+        "search": "🔍 Search",
+        "search_placeholder": "Search keywords...",
+        "filter_origin": "Origin",
+        "ai_gen": "🤖 AI Synthesized",
+        "nature_made": "🌿 Nature Made",
+        "human_made": "👤 Human Made",
+        "audio_type": "🎧 Audio Type",
+        "instrumental": "🎸 Instrumental",
+        "vocals": "🎤 Vocals Present",
+        "artifacts_found": "Artifacts Found",
+        "artifact_singular": "Artifact Found",
+        "apply_btn": "Apply Filters",
+        "clear_link": "CLEAR ALL",
+        "upload_btn": "Upload New Sound",
+    },
+    "jp": {
+        "title": "サウンド・ボルト",
+        "search": "🔍 検索",
+        "search_placeholder": "キーワードで検索...",
+        "filter_origin": "起源",
+        "ai_gen": "🤖 AI生成",
+        "nature_made": "🌿 自然音",
+        "human_made": "👤 ヒューマンメイド",
+        "audio_type": "🎧 オーディオタイプ",
+        "instrumental": "🎸 楽器音",
+        "vocals": "🎤 ボーカルあり",
+        "artifacts_found": "個の素材が見つかりました",
+        "artifact_singular": "個の素材が見つかりました",
+        "apply_btn": "フィルターを適用",
+        "clear_link": "すべてクリア",
+        "upload_btn": "素材をアップロード",
+    }
+}
 
 # 1. Initialize the App
 app = FastAPI()
@@ -26,6 +63,7 @@ if not os.path.exists("uploads"):
 async def home(
     request: Request, 
     q: str = None, 
+    lang: str = "en", # <--- Default language is English
     ai_only: bool = False, 
     human_only: bool = False,
     nature_only: bool = False,
@@ -71,20 +109,30 @@ async def home(
 
     sounds = query_obj.all()
     
+    # 🎨 Selection Logic: Pick the correct dictionary labels
+    labels = TRANSLATIONS.get(lang, TRANSLATIONS["en"])
+
     return templates.TemplateResponse(
-    request=request, 
-    name="index.html", 
-    context={
-        "ai_only": ai_only,
-        "nature_only": nature_only,
-        "human_only": human_only,
-        "is_filtering_origin": any([ai_only, nature_only, human_only]),
-        "sounds": sounds, 
-        "query": q,
-        "instrumental": instrumental,
-        "vocals": vocals
-    }
+        request=request, 
+        name="index.html", 
+        context={
+            "sounds": sounds, 
+            "query": q,
+            "labels": labels,        # <--- Pass the labels to the HTML
+            "current_lang": lang,    # <--- So the buttons know which is active
+            "ai_only": ai_only,
+            "human_only": human_only,
+            "nature_only": nature_only,
+            "instrumental": instrumental,
+            "vocals": vocals,
+            "is_filtering_origin": any([ai_only, nature_only, human_only])
+        }
     )
+
+# 🤫 THE LOG SILENCER: Add this near your other routes
+@app.get("/.well-known/appspecific/com.chrome.devtools.json")
+async def silence_chrome_ghost():
+    return {"status": "Not using automatic workspaces"}
 
 @app.post("/upload")
 async def upload_sound(
