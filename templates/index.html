@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SoundVault 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        window.toggleModal = function() {
+            console.log("!!! TRIGGER DETECTED !!!"); 
+            const modal = document.getElementById('uploadModal');
+            if (modal) {
+                modal.classList.toggle('hidden');
+                const isHidden = modal.classList.contains('hidden');
+                document.body.style.overflow = isHidden ? 'auto' : 'hidden';
+            } else {
+                alert("Architect: The ID 'uploadModal' is missing from the page!");
+            }
+        };
+    </script>
+        
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-8">
     <div class="max-w-4xl mx-auto">
@@ -82,28 +97,14 @@
                     </div>
         
                     <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 py-2 rounded-lg font-bold text-sm transition">Apply Filters</button>
+                    
                     <a href="/" class="block text-center text-xs text-slate-500 hover:text-slate-300 uppercase font-bold">Clear All</a>
                 </form>
                 
             </aside>
         
             <main class="md:col-span-3">
-                <section class="bg-slate-800 p-6 rounded-xl shadow-xl mb-12 border border-slate-700">
-                    <h2 class="text-xl font-semibold mb-4">Upload New Audio</h2>
-                    <form action="/upload" method="post" enctype="multipart/form-data" class="space-y-4">
-                        <input type="file" name="file" accept="audio/*" required 
-                               class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-500 file:text-white hover:file:bg-cyan-600 cursor-pointer">
-                        
-                        <div class="flex items-center space-x-3">
-                            <input type="checkbox" name="is_free" id="is_free" checked class="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-500">
-                            <label for="is_free" class="text-sm font-medium">Royalty Free / Safe to Use</label>
-                        </div>
-        
-                        <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded-lg transition duration-200">
-                            Process with Gemini AI
-                        </button>
-                    </form>
-                </section>
+                
                 
                 <section class="mb-10">
                     <form action="/" method="get" class="flex gap-3">
@@ -118,7 +119,28 @@
                         {% endif %}
                     </form>
                 </section>
-        
+
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+    
+                    <div>
+                        <h2 class="text-3xl font-black text-white tracking-tighter mb-1">
+                            {{ labels.title }}
+                        </h2>
+                        
+                    </div>
+                
+                    <button type="button" 
+                        onclick="toggleModal()" 
+                        class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-3 active:scale-95">
+                    
+                    <span class="text-cyan-400 text-lg font-bold leading-none">+</span>
+                    
+                    <span class="text-[10px] font-black uppercase tracking-widest leading-none">
+                        {{ labels.upload_btn }}
+                    </span>
+                </button>
+                </div>
+
                 <div class="mb-8 flex items-center justify-between border-b border-slate-700/50 pb-4">
                     <div>
                         <h2 class="text-2xl font-black text-slate-100 tracking-tight">
@@ -206,7 +228,69 @@
 
             </main>
         </div>
-
     </div>
+
+    <div id="uploadModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4">
+    
+        <div onclick="toggleModal()" class="absolute inset-0 bg-slate-950/60 backdrop-blur-md cursor-pointer"></div>
+    
+        <div class="relative bg-slate-900 border-t sm:border border-slate-700 w-full h-full sm:h-auto sm:w-[500px] sm:rounded-2xl shadow-2xl overflow-y-auto flex flex-col">
+            
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 sticky top-0 backdrop-blur-sm z-10">
+                <h3 class="text-xl font-black text-white tracking-tight">
+                    {{ labels.upload_btn }}
+                </h3>
+            
+                <button type="button" 
+                        onclick="toggleModal()" 
+                        class="group p-2 -mr-2 rounded-full hover:bg-slate-800 transition-all duration-200"
+                        aria-label="Close Modal">
+                    <svg class="w-6 h-6 text-slate-400 group-hover:text-cyan-400 transition-colors" 
+                         fill="none" 
+                         stroke="currentColor" 
+                         viewBox="0 0 24 24" 
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" 
+                              stroke-linejoin="round" 
+                              stroke-width="2.5" 
+                              d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+    
+            <div class="p-8">
+                <form action="/upload" method="post" enctype="multipart/form-data" class="space-y-6">
+                    
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                            Select Audio Artifact
+                        </label>
+                        <input type="file" name="file" required 
+                               class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-8 text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-cyan-500 file:text-slate-950 hover:file:bg-cyan-400 transition-all cursor-pointer">
+                    </div>
+            
+                    <div class="grid grid-cols-1 gap-4">
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                            {{ labels.filter_origin }}
+                        </label>
+                        <div class="flex flex-wrap gap-3">
+                            <label class="flex-1 min-w-[140px] relative group cursor-pointer">
+                                <input type="radio" name="origin" value="ai" class="peer sr-only" checked>
+                                <div class="p-3 rounded-xl border border-slate-800 bg-slate-950/50 text-center text-xs font-bold text-slate-500 peer-checked:border-cyan-500 peer-checked:text-cyan-400 peer-checked:bg-cyan-500/10 transition-all">
+                                    {{ labels.ai_gen }}
+                                </div>
+                            </label>
+                            </div>
+                    </div>
+            
+                    <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-black py-4 rounded-xl transition-all shadow-lg shadow-cyan-500/20 mt-4 active:scale-95">
+                        {{ labels.upload_btn }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
