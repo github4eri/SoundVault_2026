@@ -1,0 +1,66 @@
+/* 🏛️ THE GLASS VAULT STYLES */
+
+/* 1. The Blurred Backdrop */
+.glass-backdrop {
+       position: fixed;
+       inset: 0;
+       background-color: rgba(2, 6, 23, 0.6); /* Slate-950 at 60% */
+       backdrop-filter: blur(12px); /* This is the "Glass" effect */
+       -webkit-backdrop-filter: blur(12px); /* Support for Safari */
+       z-index: 40;
+   }
+   
+   /* 2. The Modal Container */
+   .glass-modal-container {
+       position: fixed;
+       inset: 0;
+       z-index: 50;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       pointer-events: none; /* Allows clicking the backdrop through the gaps */
+   }
+   
+   /* 3. The Modal Box (The Chamber) */
+   .glass-modal-box {
+       background-color: #0f172a; 
+       border: 1px solid rgba(51, 65, 85, 0.5); /* Back to the subtle border */
+       /* REMOVE: border: 5px solid #00ff00 !important; */
+       /* REMOVE: min-height: 200px !important; */
+       /* REMOVE: width: 300px !important; */
+       
+       width: 100%;
+       height: 100%;
+       overflow-y: auto;
+       pointer-events: auto;
+   }
+   
+   /* Ensure the box size is correct for desktop again */
+   @media (min-width: 640px) {
+       .glass-modal-box {
+           width: 500px;
+           height: auto;
+           border-radius: 1.5rem;
+       }
+   }
+   
+   /* Responsive adjustment for Desktop */
+   @media (min-width: 640px) {
+       .glass-modal-box {
+           width: 500px;
+           height: auto;
+           border-radius: 1.5rem; /* 24px */
+       }
+   }
+
+   /* 🚫 BANISH THE HORIZONTAL SCROLLBAR */
+.glass-modal-box {
+       overflow-x: hidden !important; /* Forces the gray bar to vanish */
+       max-width: 100vw;
+   }
+   
+   /* Ensure nothing inside can push the walls out */
+   .glass-modal-box * {
+       max-width: 100%;
+       box-sizing: border-box;
+   }
