@@ -1,10 +1,62 @@
-<aside class="w-72 h-full border-r border-slate-800 bg-slate-900/20 flex-shrink-0 flex flex-col p-8 space-y-10">
-       <div class="space-y-1">
-           <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-               {{ labels.collection_title }}
-           </h3>
-           <p class="text-white font-black text-lg">SoundVault</p>
-       </div>
-       
+<aside class="md:col-span-1">
+    <form action="/" method="get" id="filter-form" class="space-y-6 bg-slate-800/50 p-6 rounded-2xl border border-slate-700 sticky top-8">
+        <input type="hidden" name="lang" value="{{ current_lang }}">
+        <div class="w-full flex flex-col items-center px-2">
+            <label class="w-full text-center text-[10px] font-black text-slate-500 uppercase mb-3 tracking-widest">
+                {{ labels.search }}
+            </label>
+            
+            <div class="w-full relative">
+                <input type="text" name="q" value="{{ query or '' }}" 
+                       placeholder="{{ labels.search_placeholder }}" 
+                       class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-center focus:ring-2 focus:ring-cyan-500/50 transition-all outline-none placeholder:text-slate-600">
+            </div>
+        </div>
+        
+        <hr class="border-slate-700/50">
+        
+        <div>
+            <label class="block text-[10px] font-black uppercase mb-4 ...">
+                {{ labels.filter_origin }} 
+                {% if is_filtering_origin %}<span class="...">●</span>{% endif %}
+            </label>
+            
+            <label class="flex items-center gap-3 text-sm cursor-pointer">
+                <input type="checkbox" name="ai_only" ...>
+                <span>{{ labels.ai_gen }}</span>
+            </label>
+            
+            <label class="flex items-center gap-3 text-sm cursor-pointer">
+                <input type="checkbox" name="nature_only" ...>
+                <span>{{ labels.nature_made }}</span>
+            </label>
+            
+            <label class="flex items-center gap-3 text-sm cursor-pointer">
+                <input type="checkbox" name="human_only" ...>
+                <span>{{ labels.human_made }}</span>
+            </label>
+        </div>
+        
+        <div>
+            <label class="block text-[10px] font-black text-slate-500 uppercase mb-4">{{ labels.audio_type }}</label>
+            <label class="flex items-center gap-3 text-sm cursor-pointer">
+                <input type="checkbox" name="instrumental" ...>
+                <span>{{ labels.instrumental }}</span>
+            </label>
+            <label class="flex items-center gap-3 text-sm cursor-pointer">
+                <input type="checkbox" name="vocals" ...>
+                <span>{{ labels.vocals }}</span>
+            </label>
+        </div>
+
+        <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 py-2 rounded-lg font-bold text-sm transition">
+            {{ labels.apply_filters }}
+        </button>
+        
+        <a href="/" class="block text-center text-xs text-slate-500 hover:text-slate-300 uppercase font-bold">
+            {{ labels.clear_all }}
+        </a>
+    </form>
+    
 </aside>
-class="w-72 flex-shrink-0 h-full border-r border-slate-800"
+

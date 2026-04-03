@@ -23,10 +23,8 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-8">
     <div class="max-w-4xl mx-auto">
-        <header class="mb-12 border-b border-slate-700 pb-6">
-            <h1 class="text-4xl font-bold text-cyan-400">🎧 SoundVault</h1>
-            <p class="text-slate-400">Your AI-Powered Library</p>
-        </header>
+        
+        {% include 'components/header.html' %}
     
         <div class="flex items-center justify-start gap-3 mb-8 border-b border-slate-700/50 pb-6">
             <div class="flex bg-slate-900/50 p-1 rounded-lg border border-slate-700">
@@ -45,63 +43,7 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <aside class="md:col-span-1">
-                <form action="/" method="get" id="filter-form" class="space-y-6 bg-slate-800/50 p-6 rounded-2xl border border-slate-700 sticky top-8">
-                    <input type="hidden" name="lang" value="{{ current_lang }}">
-                    <div class="w-full flex flex-col items-center px-2">
-                        <label class="w-full text-center text-[10px] font-black text-slate-500 uppercase mb-3 tracking-widest">
-                            {{ labels.search }}
-                        </label>
-                        
-                        <div class="w-full relative">
-                            <input type="text" name="q" value="{{ query or '' }}" 
-                                   placeholder="{{ labels.search_placeholder }}" 
-                                   class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-center focus:ring-2 focus:ring-cyan-500/50 transition-all outline-none placeholder:text-slate-600">
-                        </div>
-                    </div>
-                    
-                    <hr class="border-slate-700/50">
-                    
-                    <div>
-                        <label class="block text-[10px] font-black uppercase mb-4 ...">
-                            {{ labels.filter_origin }} 
-                            {% if is_filtering_origin %}<span class="...">●</span>{% endif %}
-                        </label>
-                        
-                        <label class="flex items-center gap-3 text-sm cursor-pointer">
-                            <input type="checkbox" name="ai_only" ...>
-                            <span>{{ labels.ai_gen }}</span>
-                        </label>
-                        
-                        <label class="flex items-center gap-3 text-sm cursor-pointer">
-                            <input type="checkbox" name="nature_only" ...>
-                            <span>{{ labels.nature_made }}</span>
-                        </label>
-                        
-                        <label class="flex items-center gap-3 text-sm cursor-pointer">
-                            <input type="checkbox" name="human_only" ...>
-                            <span>{{ labels.human_made }}</span>
-                        </label>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-[10px] font-black text-slate-500 uppercase mb-4">{{ labels.audio_type }}</label>
-                        <label class="flex items-center gap-3 text-sm cursor-pointer">
-                            <input type="checkbox" name="instrumental" ...>
-                            <span>{{ labels.instrumental }}</span>
-                        </label>
-                        <label class="flex items-center gap-3 text-sm cursor-pointer">
-                            <input type="checkbox" name="vocals" ...>
-                            <span>{{ labels.vocals }}</span>
-                        </label>
-                    </div>
-        
-                    <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 py-2 rounded-lg font-bold text-sm transition">Apply Filters</button>
-                    
-                    <a href="/" class="block text-center text-xs text-slate-500 hover:text-slate-300 uppercase font-bold">Clear All</a>
-                </form>
-                
-            </aside>
+            {% include 'components/aside.html' %}
         
             <main class="md:col-span-3">
                 
@@ -225,72 +167,12 @@
                         {% endfor %}
                     </div>
                 </section>
-
+               
             </main>
         </div>
     </div>
 
-    <div id="uploadModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4">
-    
-        <div onclick="toggleModal()" class="absolute inset-0 bg-slate-950/60 backdrop-blur-md cursor-pointer"></div>
-    
-        <div class="relative bg-slate-900 border-t sm:border border-slate-700 w-full h-full sm:h-auto sm:w-[500px] sm:rounded-2xl shadow-2xl overflow-y-auto flex flex-col">
-            
-            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 sticky top-0 backdrop-blur-sm z-10">
-                <h3 class="text-xl font-black text-white tracking-tight">
-                    {{ labels.upload_btn }}
-                </h3>
-            
-                <button type="button" 
-                        onclick="toggleModal()" 
-                        class="group p-2 -mr-2 rounded-full hover:bg-slate-800 transition-all duration-200"
-                        aria-label="Close Modal">
-                    <svg class="w-6 h-6 text-slate-400 group-hover:text-cyan-400 transition-colors" 
-                         fill="none" 
-                         stroke="currentColor" 
-                         viewBox="0 0 24 24" 
-                         xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" 
-                              stroke-linejoin="round" 
-                              stroke-width="2.5" 
-                              d="M6 18L18 6M6 6l12 12">
-                        </path>
-                    </svg>
-                </button>
-            </div>
-    
-            <div class="p-8">
-                <form action="/upload" method="post" enctype="multipart/form-data" class="space-y-6">
-                    
-                    <div class="space-y-2">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                            Select Audio Artifact
-                        </label>
-                        <input type="file" name="file" required 
-                               class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-8 text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-cyan-500 file:text-slate-950 hover:file:bg-cyan-400 transition-all cursor-pointer">
-                    </div>
-            
-                    <div class="grid grid-cols-1 gap-4">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                            {{ labels.filter_origin }}
-                        </label>
-                        <div class="flex flex-wrap gap-3">
-                            <label class="flex-1 min-w-[140px] relative group cursor-pointer">
-                                <input type="radio" name="origin" value="ai" class="peer sr-only" checked>
-                                <div class="p-3 rounded-xl border border-slate-800 bg-slate-950/50 text-center text-xs font-bold text-slate-500 peer-checked:border-cyan-500 peer-checked:text-cyan-400 peer-checked:bg-cyan-500/10 transition-all">
-                                    {{ labels.ai_gen }}
-                                </div>
-                            </label>
-                            </div>
-                    </div>
-            
-                    <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-black py-4 rounded-xl transition-all shadow-lg shadow-cyan-500/20 mt-4 active:scale-95">
-                        {{ labels.upload_btn }}
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
+    {% include 'components/vault_modal.html' %}
 
 </body>
 </html>
