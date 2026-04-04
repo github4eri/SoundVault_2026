@@ -57,6 +57,17 @@
                     </select>
                 </div>
         
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                        {{ labels.copyright_label }}
+                    </label>
+                    <select name="copyright" required class="w-full bg-slate-950 border border-slate-800 text-slate-300 rounded-xl py-3 px-4 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none cursor-pointer appearance-none text-sm font-bold">
+                        <option value="" disabled selected>{{ labels.choose_copyright }}</option>
+                        <option value="free">{{ labels.copyright_free }}</option>
+                        <option value="protected">{{ labels.copyright_protected }}</option>
+                    </select>
+                </div>
+
                 <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-black py-4 rounded-xl transition-all shadow-lg shadow-cyan-500/20 mt-4 active:scale-95">
                     {{ labels.upload_btn }}
                 </button>

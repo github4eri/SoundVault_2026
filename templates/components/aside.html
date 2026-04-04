@@ -15,6 +15,31 @@
         
         <hr class="border-slate-700/50">
         
+
+        <div class="mb-8">
+            <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">
+                {{ labels.copyright_label }}
+            </h4>
+            
+            <div class="space-y-3">
+                <label class="flex items-center gap-3 text-sm cursor-pointer">
+                    <input type="checkbox" name="copyright_all">
+                    <span>{{ labels.filter_all }}</span>
+                </label>
+        
+                <label class="flex items-center gap-3 text-sm cursor-pointer">
+                    <input type="checkbox" name="copyright_free">
+                    <span>{{ labels.copyright_free }}</span>
+                </label>
+        
+                <label class="flex items-center gap-3 text-sm cursor-pointer">
+                    <input type="checkbox" name="copyright_protected">
+                    <span>{{ labels.copyright_protected }}</span>
+                </label>
+            </div>
+        </div>
+
+
         <div>
             <label class="block text-[10px] font-black uppercase mb-4 ...">
                 {{ labels.filter_origin }} 

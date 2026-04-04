@@ -32,12 +32,19 @@ TRANSLATIONS = {
         "collection_title": "Your Collection",
         "select_artifact": "Select Audio Artifact",
         "upload_btn": "Deposit Sound",
+        "sound_library": "Sound Library",
+        "modal_title": "Upload Section",
         # Dropdown options
         "origin_label": "Sound",
         "origin_ai": "AI Generated Sound",
         "origin_nature": "Nature Sound",
         "origin_human": "Sound",
-        "choose_category": "-- Select Category --"
+        "choose_category": "-- Select Category --",
+        "copyright_label": "Copyright Status",
+        "copyright_free": "Royalty Free / Cleared",
+        "copyright_protected": "Copyright Protected",
+        "choose_copyright": "-- Select Status --",
+        "filter_all": "All"
         },
     "jp": {
         "apply_filters": "フィルターを適用",
@@ -46,7 +53,7 @@ TRANSLATIONS = {
         "collection_title": "あなたのコレクション",
         "select_artifact": "サウンドを選択",
         "upload_btn": "アップロード",
-
+        "sound_library": "サウンドライブラリー",
         "title": "サウンド・ボルト",
         "search": "🔍 検索",
         "search_placeholder": "キーワードで検索...",
@@ -62,12 +69,18 @@ TRANSLATIONS = {
         "apply_btn": "フィルターを適用",
         "clear_link": "すべてクリア",
         "upload_btn": "アップロード",
+        "modal_title": "アップロードセクション",
         # Dropdown options
         "origin_label": "音源",
         "origin_ai": "AI生成音",
         "origin_nature": "自然音",
         "origin_human": "音源",
-        "choose_category": "-- カテゴリーを選択 --"
+        "choose_category": "-- カテゴリーを選択 --",
+        "copyright_label": "著作権",
+        "copyright_free": "ロイヤリティフリー / クリア済",
+        "copyright_protected": "著作権保護あり",
+        "choose_copyright": "-- ステータスを選択 --",
+        "filter_all": "全て"
     }
 }
 
@@ -94,6 +107,9 @@ async def home(
     nature_only: bool = False,
     instrumental: bool = False,
     vocals: bool = False,
+    copyright_all: bool = False,
+    copyright_free: bool = False,
+    copyright_protected: bool = False,
     db: Session = Depends(database.get_db)
 ):
     query_obj = db.query(models.Sound)
@@ -133,6 +149,18 @@ async def home(
         query_obj = query_obj.filter(models.Sound.has_vocals == True)
 
     sounds = query_obj.all()
+
+    # 4. Copyright Filter
+
+    # If they only checked "Free", show only True
+    if copyright_free and not copyright_protected:
+        query_obj = query_obj.filter(models.Sound.is_royalty_free == True)
+    
+    # If they only checked "Protected", show only False
+    elif copyright_protected and not copyright_free:
+        query_obj = query_obj.filter(models.Sound.is_royalty_free == False)
+        
+    # If they checked "All", or checked both, it does not filter anything!
     
     # 🎨 Selection Logic: Pick the correct dictionary labels
     labels = TRANSLATIONS.get(lang, TRANSLATIONS["en"])
@@ -150,6 +178,9 @@ async def home(
             "nature_only": nature_only,
             "instrumental": instrumental,
             "vocals": vocals,
+            "copyright_all": copyright_all,
+            "copyright_free": copyright_free,
+            "copyright_protected": copyright_protected,
             "is_filtering_origin": any([ai_only, nature_only, human_only])
         }
     )
@@ -163,7 +194,8 @@ async def silence_chrome_ghost():
 async def upload_sound(
     request: Request,
     file: UploadFile = File(...),
-    is_free: bool = Form(True),
+    origin: str = Form(...),     # Catches the Origin dropdown
+    copyright: str = Form(...),
     db: Session = Depends(database.get_db)
 ):
     # Save file locally
@@ -192,13 +224,18 @@ async def upload_sound(
     else:
         tags_str = str(tags_raw)
 
+    # Convert HTML dropdowns to Database booleans
+    user_is_free = (copyright == "free")
+    user_is_ai = (origin == "ai")
+    user_is_nature = (origin == "nature")
+
     # 💾 Save to Database
     new_sound = models.Sound(
         title=ai_data.get("title", file.filename),
         file_path=file_path,
         duration=duration,
-        is_royalty_free=is_free,
-        
+        is_royalty_free=user_is_free,
+
         # New Fields
         tempo_rhythm=ai_data.get("tempo_rhythm"),
         is_orchestrated=ai_data.get("is_orchestrated"),
@@ -206,10 +243,11 @@ async def upload_sound(
         has_vocals=ai_data.get("has_vocals"),
 
         acoustic_type=ai_data.get("acoustic_type"),
-        is_environmental=ai_data.get("is_environmental"),
+        is_environmental=user_is_nature,
         music_genre=ai_data.get("music_genre"),
         origin_country=ai_data.get("origin_country"),
-        is_ai_generated=ai_data.get("is_ai_generated"),
+        is_ai_generated=user_is_ai,
+
         # Original Fields
         ai_mood=ai_data.get("mood"),
         ai_instruments=", ".join(ai_data.get("instruments", [])),
