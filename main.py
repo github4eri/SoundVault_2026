@@ -148,19 +148,14 @@ async def home(
     if vocals:
         query_obj = query_obj.filter(models.Sound.has_vocals == True)
 
-    sounds = query_obj.all()
-
     # 4. Copyright Filter
-
-    # If they only checked "Free", show only True
     if copyright_free and not copyright_protected:
         query_obj = query_obj.filter(models.Sound.is_royalty_free == True)
-    
-    # If they only checked "Protected", show only False
     elif copyright_protected and not copyright_free:
         query_obj = query_obj.filter(models.Sound.is_royalty_free == False)
-        
-    # If they checked "All", or checked both, it does not filter anything!
+
+    # THE FETCH COMMAND (Must be at the very bottom of all filters!)
+    sounds = query_obj.all()
     
     # 🎨 Selection Logic: Pick the correct dictionary labels
     labels = TRANSLATIONS.get(lang, TRANSLATIONS["en"])
