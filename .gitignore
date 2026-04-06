@@ -2,3 +2,5 @@
 soundvault.db
 __pycache__/
 uploads/
+.vscode/
+.pyc

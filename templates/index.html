@@ -58,7 +58,8 @@
                         </h2>
                         
                     </div>
-                
+                   
+                    {% if is_admin %}
                     <button type="button" 
                         onclick="toggleModal()" 
                         class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-3 active:scale-95">
@@ -68,7 +69,8 @@
                     <span class="text-[10px] font-black uppercase tracking-widest leading-none">
                         {{ labels.upload_btn }}
                     </span>
-                </button>
+                    </button>
+                    {% endif %}
                 </div>
 
                 <div class="mb-8 flex items-center justify-between border-b border-slate-700/50 pb-4">
@@ -79,10 +81,10 @@
                         
                     </div>
                     
-                    <div class="bg-cyan-500/10 border border-cyan-500/30 px-4 py-2 rounded-xl">
-                        <span class="text-xs font-black text-cyan-400 uppercase tracking-widest">
-                            {{ sounds|length }} {{ labels.artifacts_found if sounds|length != 1 else labels.artifact_singular }}
-                        </span>
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-900 border border-slate-700/50 rounded-lg shadow-inner cursor-default">
+                        <span class="text-cyan-400 text-sm">📻</span>
+                        <span class="text-white font-bold text-sm">{{ sounds|length }}</span> 
+                        <span class="text-slate-400 text-xs uppercase tracking-widest font-medium">Tracks in Vault</span>
                     </div>
                 </div>
 
@@ -101,11 +103,13 @@
                                         {{ 'FREE' if sound.is_royalty_free else 'RESTRICTED' }}
                                     </span>
                                     
+                                    {% if is_admin %}
                                     <form action="/delete/{{ sound.id }}" method="post" class="inline">
                                         <button type="submit" onclick="return confirm('Are you sure you want to delete this sound?')" class="text-[10px] text-red-500 hover:text-red-400 font-bold">
                                             [DELETE]
                                         </button>
                                     </form>
+                                    {% endif %}
                                 </div>
                                 <h3 class="text-lg font-bold leading-tight">{{ sound.title }}</h3>
                             </div>

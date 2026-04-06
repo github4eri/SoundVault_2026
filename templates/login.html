@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-300 font-sans min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl">
+        <h2 class="text-3xl font-black text-center text-white tracking-tight mb-6">🔐 Media Vault</h2>
+        
+        {% if error %}
+            <div class="bg-red-900/50 border border-red-500 text-red-200 p-4 rounded-xl mb-6 text-sm text-center">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <form action="/login" method="post" class="space-y-5">
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Username</label>
+                <input type="text" name="username" required autofocus 
+                       class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all">
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Password</label>
+                <input type="password" name="password" required 
+                       class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all">
+            </div>
+            
+            <button type="submit" 
+                    class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-cyan-900/20 mt-4">
+                Sign In
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>

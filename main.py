@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 import models, database, audio_processor
 import json
 from sqlalchemy import or_ # This allows to search "Title OR Genre OR Country"
+from starlette.middleware.sessions import SessionMiddleware
 
 # 🌎 THE BILINGUAL MAP
 TRANSLATIONS = {
@@ -88,6 +89,9 @@ TRANSLATIONS = {
 app = FastAPI()
 models.Base.metadata.create_all(bind=database.engine)
 
+# This is the engine that handles login cookies!
+app.add_middleware(SessionMiddleware, secret_key="PutSomeRandomLongStringHereForSecurity")
+
 # 2. Setup Folders
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
@@ -111,8 +115,12 @@ async def home(
     copyright_free: bool = False,
     copyright_protected: bool = False,
     db: Session = Depends(database.get_db)
+    
 ):
     query_obj = db.query(models.Sound)
+
+# 🕵️ Check if the visitor has the Master Key!
+    is_admin = request.session.get("is_admin", False)
 
     # 1. Text Search
     if q:
@@ -176,7 +184,8 @@ async def home(
             "copyright_all": copyright_all,
             "copyright_free": copyright_free,
             "copyright_protected": copyright_protected,
-            "is_filtering_origin": any([ai_only, nature_only, human_only])
+            "is_filtering_origin": any([ai_only, nature_only, human_only]),
+            "is_admin": is_admin
         }
     )
 
@@ -188,11 +197,17 @@ async def silence_chrome_ghost():
 @app.post("/upload")
 async def upload_sound(
     request: Request,
+    sound_id: int,
     file: UploadFile = File(...),
     origin: str = Form(...),     # Catches the Origin dropdown
     copyright: str = Form(...),
     db: Session = Depends(database.get_db)
 ):
+
+    # 🛑 THE INVISIBLE VAULT DOOR
+    if not request.session.get("is_admin"):
+        return RedirectResponse(url="/", status_code=303)
+
     # Save file locally
     file_path = f"uploads/{file.filename}"
     with open(file_path, "wb") as buffer:
@@ -256,9 +271,14 @@ async def upload_sound(
     return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
     
 @app.post("/delete/{sound_id}")
-async def delete_sound(sound_id: int, db: Session = Depends(database.get_db)):
+async def delete_sound(request: Request, sound_id: int, db: Session = Depends(database.get_db)):
+    
     # 1. Find the sound in the database
     sound = db.query(models.Sound).filter(models.Sound.id == sound_id).first()
+    
+    # 🛑 THE INVISIBLE VAULT DOOR
+    if not request.session.get("is_admin"):
+        return RedirectResponse(url="/", status_code=303)
     
     if sound:
         # 2. Delete the actual file from the 'uploads' folder
@@ -270,4 +290,45 @@ async def delete_sound(sound_id: int, db: Session = Depends(database.get_db)):
         db.commit()
         
     return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.get("/login")
+async def login_page(request: Request):
+    # If already logged in, redirect to home
+    if request.session.get("is_admin"):
+        return RedirectResponse(url="/", status_code=303)
+        
+    return templates.TemplateResponse(
+        request=request, 
+        name="login.html", 
+        context={"error": None}
+    )
+
+@app.post("/login")
+async def process_login(
+    request: Request, 
+    username: str = Form(...), 
+    password: str = Form(...)
+):
+    # 1. Grab the real credentials from the .env file
+    env_user = os.getenv("ADMIN_USERNAME", "admin")
+    env_pass = os.getenv("ADMIN_PASSWORD", "changeme")
+
+    # 2. Check if what the user typed matches the .env file
+    if username == env_user and password == env_pass:
+        # Success! Give them the master key (cookie)
+        request.session["is_admin"] = True
+        return RedirectResponse(url="/", status_code=303)
     
+    # 3. Failed login! Send them back with an error message
+    return templates.TemplateResponse(
+        request=request, 
+        name="login.html", 
+        context={"error": "Invalid username or password."}
+    )
+
+@app.get("/logout")
+async def logout(request: Request):
+    # Destroy the master key
+    request.session.clear()
+    return RedirectResponse(url="/login", status_code=303)
+
