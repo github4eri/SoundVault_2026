@@ -31,7 +31,7 @@ TRANSLATIONS = {
         "clear_all": "Clear All",
         "library_title": "Sound Library",
         "collection_title": "Your Collection",
-        "select_artifact": "Select Audio Artifact",
+        "select_artifact": "Select Audio File",
         "upload_btn": "Deposit Sound",
         "sound_library": "Sound Library",
         "modal_title": "Upload Section",
@@ -53,7 +53,7 @@ TRANSLATIONS = {
         "library_title": "サウンドライブラリ",
         "collection_title": "あなたのコレクション",
         "select_artifact": "サウンドを選択",
-        "upload_btn": "アップロード",
+        "upload_btn": "サウンドをアップロード",
         "sound_library": "サウンドライブラリー",
         "title": "サウンド・ボルト",
         "search": "🔍 検索",
@@ -197,7 +197,6 @@ async def silence_chrome_ghost():
 @app.post("/upload")
 async def upload_sound(
     request: Request,
-    sound_id: int,
     file: UploadFile = File(...),
     origin: str = Form(...),     # Catches the Origin dropdown
     copyright: str = Form(...),
