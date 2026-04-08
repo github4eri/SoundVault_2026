@@ -1,27 +1,25 @@
+import os
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
+from dotenv import load_dotenv
 
-# 1. Name the database file
-SQLALCHEMY_DATABASE_URL = "sqlite:///./soundvault.db"
+# Load environment variables
+load_dotenv()
 
-# 2. Create the "Engine" (The motor that drives the data)
-# 'check_same_thread' is only needed for SQLite
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+# Grab the cloud URL from your .env file
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 
-# 3. Create a Session Factory (The phone line to the DB)
+# Create the engine (SQLite specific arguments are removed!)
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# 4. The Base class (What our models in models.py will inherit from)
 Base = declarative_base()
 
-# 5. Dependency to get a DB session
+# The Database session generator
 def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
-        db.close()
-       
+        db.close()    
