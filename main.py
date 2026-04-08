@@ -92,6 +92,9 @@ models.Base.metadata.create_all(bind=database.engine)
 # This is the engine that handles login cookies!
 app.add_middleware(SessionMiddleware, secret_key="PutSomeRandomLongStringHereForSecurity")
 
+# Ensure the uploads directory exists before mounting
+os.makedirs("uploads", exist_ok=True)
+
 # 2. Setup Folders
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
