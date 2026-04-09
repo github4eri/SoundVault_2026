@@ -146,9 +146,15 @@
                                     <p class="text-[10px] text-slate-500 uppercase tracking-widest">Duration</p>
                                     <p class="font-mono text-[10px] text-cyan-400">{{ sound.duration }}</p>
                                 </div>
-                                <audio controls class="w-full h-8">
-                                    <source src="/{{ sound.file_path }}" type="audio/mpeg">
-                                </audio>
+                                {% if sound.file_path.startswith('http') %}
+                                    <audio controls class="w-full h-8">
+                                        <source src="{{ sound.file_path }}" type="audio/mpeg">
+                                    </audio>
+                                {% else %}
+                                    <audio controls class="w-full h-8">
+                                        <source src="/{{ sound.file_path }}" type="audio/mpeg">
+                                    </audio>
+                                {% endif %}
                             </div>
                             
                         </div>

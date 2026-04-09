@@ -8,6 +8,19 @@ import models, database, audio_processor
 import json
 from sqlalchemy import or_ # This allows to search "Title OR Genre OR Country"
 from starlette.middleware.sessions import SessionMiddleware
+import boto3
+
+
+# Connect to AWS S3 using your environment variables
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    region_name=os.getenv("AWS_REGION")
+)
+
+AWS_BUCKET_NAME = os.getenv("AWS_BUCKET_NAME")
+AWS_REGION = os.getenv("AWS_REGION")
 
 # 🌎 THE BILINGUAL MAP
 TRANSLATIONS = {
@@ -210,26 +223,40 @@ async def upload_sound(
     if not request.session.get("is_admin"):
         return RedirectResponse(url="/", status_code=303)
 
-    # Save file locally
-    file_path = f"uploads/{file.filename}"
-    with open(file_path, "wb") as buffer:
+    # 1. Save file locally FIRST so Gemini can listen to it
+    safe_filename = file.filename.replace(" ", "_") # Clean name for URLs
+    local_file_path = f"uploads/{safe_filename}"
+    with open(local_file_path, "wb") as buffer:
         buffer.write(await file.read())
 
-    # 🧠 The Magic: AI Analysis
-    ai_data_json = await audio_processor.analyze_audio_with_gemini(file_path)
+    # 🧠 2. The Magic: AI Analysis (Using the local file)
+    ai_data_json = await audio_processor.analyze_audio_with_gemini(local_file_path)
     ai_data = json.loads(ai_data_json)
     
-    # 🎹 Get Technical Metadata
-    duration = audio_processor.get_audio_duration(file_path)
+    # 🎹 3. Get Technical Metadata (Using the local file)
+    duration = audio_processor.get_audio_duration(local_file_path)
 
-    # 💾 Save to Database
+    # ☁️ 4. NEW: Upload to AWS S3!
+    s3_client.upload_file(
+        local_file_path,
+        AWS_BUCKET_NAME,
+        safe_filename,
+        ExtraArgs={"ContentType": file.content_type}
+    )
+    
+    # Create the public Amazon URL
+    s3_url = f"https://{AWS_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{safe_filename}"
+    
+    # 🧹 5. NEW: Delete the temporary local file (Keep the server clean!)
+    os.remove(local_file_path)
+
+    # 💾 Formatting for Database
     instruments_raw = ai_data.get("instruments", "")
     if isinstance(instruments_raw, list):
         instruments_str = ", ".join(instruments_raw)
     else:
         instruments_str = str(instruments_raw)
 
-    # For tags: convert ['nature', 'morning'] -> "nature, morning"
     tags_raw = ai_data.get("tags", "")
     if isinstance(tags_raw, list):
         tags_str = ", ".join(tags_raw)
@@ -241,10 +268,10 @@ async def upload_sound(
     user_is_ai = (origin == "ai")
     user_is_nature = (origin == "nature")
 
-    # 💾 Save to Database
+    # 💾 6. Save to Database (USING THE NEW S3 URL!)
     new_sound = models.Sound(
-        title=ai_data.get("title", file.filename),
-        file_path=file_path,
+        title=ai_data.get("title", safe_filename),
+        file_path=s3_url,   # 👈 CHANGED THIS: Now saves the Amazon link!
         duration=duration,
         is_royalty_free=user_is_free,
 
