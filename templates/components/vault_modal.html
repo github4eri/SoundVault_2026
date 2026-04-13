@@ -51,18 +51,6 @@
                 </div>
                 
                 <div class="space-y-2">
-                    <label for="file-upload" class="cursor-pointer flex flex-col items-center justify-center w-full bg-slate-950 border border-slate-800 hover:border-cyan-500 text-slate-400 hover:text-cyan-400 py-6 rounded-xl transition-all">
-                        <svg class="w-6 h-6 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                        </svg>
-                        <span id="file-name-display" class="font-bold text-xs uppercase tracking-widest text-center px-4 truncate w-full max-w-[250px]">
-                            {{ labels.select_artifact }}
-                        </span>
-                    </label>
-                    <input id="file-upload" type="file" name="file" class="hidden" required onchange="updateFileName(this)">
-                </div>
-                
-                <div class="space-y-2">
                     <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">
                         {{ labels.origin_label }}
                     </label>
