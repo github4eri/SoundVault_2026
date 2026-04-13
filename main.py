@@ -214,6 +214,7 @@ async def silence_chrome_ghost():
 async def upload_sound(
     request: Request,
     file: UploadFile = File(...),
+    title: str = Form(...),      # <--- Your new catcher's glove!
     origin: str = Form(...),     # Catches the Origin dropdown
     copyright: str = Form(...),
     db: Session = Depends(database.get_db)
@@ -270,7 +271,7 @@ async def upload_sound(
 
     # 💾 6. Save to Database (USING THE NEW S3 URL!)
     new_sound = models.Sound(
-        title=ai_data.get("title", safe_filename),
+        title=title,    # <--- Now it uses the text you typed in the modal!
         file_path=s3_url,   # 👈 CHANGED THIS: Now saves the Amazon link!
         duration=duration,
         is_royalty_free=user_is_free,

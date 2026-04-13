@@ -44,7 +44,6 @@ async def analyze_audio_with_gemini(file_path):
     
     Provide JSON:
     {
-      "title": "Professional Title",
       "mood": "Mood",
       "instruments": ["list"],
       "main_instrument": "Specific dominant instrument",
