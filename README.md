@@ -1,6 +1,6 @@
 ## 🎧 SoundVault 2026: AI-Powered Audio Intelligence
 
-[Screenshot Placeholder - Coming Soon]
+<p align="center"><img src="images/SoundVault2026.jpg" width="70%"></p>
 
 **📄 Overview**
 
