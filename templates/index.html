@@ -60,16 +60,23 @@
                     </div>
                    
                     {% if is_admin %}
-                    <button type="button" 
-                        onclick="toggleModal()" 
-                        class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-3 active:scale-95">
-                    
-                    <span class="text-cyan-400 text-lg font-bold leading-none">+</span>
-                    
-                    <span class="text-[10px] font-black uppercase tracking-widest leading-none">
-                        {{ labels.upload_btn }}
-                    </span>
-                    </button>
+                    <div class="flex items-center gap-3">
+                        <button type="button"
+                            onclick="toggleModal()"
+                            class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-3 active:scale-95">
+
+                        <span class="text-cyan-400 text-lg font-bold leading-none">+</span>
+
+                        <span class="text-[10px] font-black uppercase tracking-widest leading-none">
+                            {{ labels.upload_btn }}
+                        </span>
+                        </button>
+
+                        <a href="/logout"
+                            class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-400 transition-all px-3">
+                            Logout
+                        </a>
+                    </div>
                     {% endif %}
                 </div>
 

@@ -103,7 +103,7 @@ app = FastAPI()
 models.Base.metadata.create_all(bind=database.engine)
 
 # This is the engine that handles login cookies!
-app.add_middleware(SessionMiddleware, secret_key="PutSomeRandomLongStringHereForSecurity")
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET_KEY"))
 
 # Ensure the uploads directory exists before mounting
 os.makedirs("uploads", exist_ok=True)
@@ -227,29 +227,39 @@ async def upload_sound(
     # 1. Save file locally FIRST so Gemini can listen to it
     safe_filename = file.filename.replace(" ", "_") # Clean name for URLs
     local_file_path = f"uploads/{safe_filename}"
-    with open(local_file_path, "wb") as buffer:
-        buffer.write(await file.read())
+    try:
+        with open(local_file_path, "wb") as buffer:
+            buffer.write(await file.read())
 
-    # 🧠 2. The Magic: AI Analysis (Using the local file)
-    ai_data_json = await audio_processor.analyze_audio_with_gemini(local_file_path)
-    ai_data = json.loads(ai_data_json)
-    
-    # 🎹 3. Get Technical Metadata (Using the local file)
-    duration = audio_processor.get_audio_duration(local_file_path)
+        # 🧠 2. The Magic: AI Analysis (Using the local file)
+        try:
+            ai_data_json = await audio_processor.analyze_audio_with_gemini(local_file_path)
+            ai_data = json.loads(ai_data_json)
+        except Exception as e:
+            print(f"Warning: Gemini analysis failed, using defaults: {e}")
+            ai_data = {}
 
-    # ☁️ 4. NEW: Upload to AWS S3!
-    s3_client.upload_file(
-        local_file_path,
-        AWS_BUCKET_NAME,
-        safe_filename,
-        ExtraArgs={"ContentType": file.content_type}
-    )
-    
+        # 🎹 3. Get Technical Metadata (Using the local file)
+        duration = audio_processor.get_audio_duration(local_file_path)
+
+        # ☁️ 4. Upload to AWS S3!
+        try:
+            s3_client.upload_file(
+                local_file_path,
+                AWS_BUCKET_NAME,
+                safe_filename,
+                ExtraArgs={"ContentType": file.content_type}
+            )
+        except Exception as e:
+            print(f"Error: S3 upload failed for '{safe_filename}': {e}")
+            return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+    finally:
+        # 🧹 5. Always clean up the temporary local file (Keep the server clean!)
+        if os.path.exists(local_file_path):
+            os.remove(local_file_path)
+
     # Create the public Amazon URL
     s3_url = f"https://{AWS_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{safe_filename}"
-    
-    # 🧹 5. NEW: Delete the temporary local file (Keep the server clean!)
-    os.remove(local_file_path)
 
     # 💾 Formatting for Database
     instruments_raw = ai_data.get("instruments", "")
@@ -290,12 +300,16 @@ async def upload_sound(
 
         # Original Fields
         ai_mood=ai_data.get("mood"),
-        ai_instruments=", ".join(ai_data.get("instruments", [])),
+        ai_instruments=instruments_str,
         ai_description=ai_data.get("description"),
-        ai_tags=", ".join(ai_data.get("tags", []))
+        ai_tags=tags_str
     )
-    db.add(new_sound)
-    db.commit()
+    try:
+        db.add(new_sound)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"Error: failed to save sound to database: {e}")
 
     # This kicks the user back to the home page to see their new sound!
     return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
@@ -311,10 +325,13 @@ async def delete_sound(request: Request, sound_id: int, db: Session = Depends(da
         return RedirectResponse(url="/", status_code=303)
     
     if sound:
-        # 2. Delete the actual file from the 'uploads' folder
-        if os.path.exists(sound.file_path):
-            os.remove(sound.file_path)
-        
+        # 2. Delete the actual file from S3 (file_path is a full S3 URL)
+        s3_key = sound.file_path.rsplit("/", 1)[-1]
+        try:
+            s3_client.delete_object(Bucket=AWS_BUCKET_NAME, Key=s3_key)
+        except Exception as e:
+            print(f"Warning: failed to delete S3 object '{s3_key}': {e}")
+
         # 3. Remove the record from the database
         db.delete(sound)
         db.commit()
