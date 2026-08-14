@@ -22,7 +22,7 @@ def get_audio_duration(file_path):
         return "Unknown"
 
 async def analyze_audio_with_gemini(file_path):
-    """The 'Ears': Using the Gemini 2.5 Flash model."""
+    """The 'Ears': Using the Gemini 2.5 Flash Lite model."""
 
     # 1. Upload to Gemini's workspace
     file_upload = client.files.upload(file=file_path)
@@ -75,7 +75,7 @@ async def analyze_audio_with_gemini(file_path):
 
     # 2. Call the 2.5 version
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-2.5-flash-lite",
         contents=[file_upload, prompt],
         config=types.GenerateContentConfig(
             response_mime_type="application/json"
