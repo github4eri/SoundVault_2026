@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 from fastapi import FastAPI, UploadFile, File, Depends, Request, Form, status
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -336,6 +337,60 @@ async def delete_sound(request: Request, sound_id: int, db: Session = Depends(da
         db.delete(sound)
         db.commit()
         
+    return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.post("/edit/{sound_id}")
+async def edit_sound(
+    request: Request,
+    sound_id: int,
+    title: str = Form(...),
+    acoustic_type: str = Form(""),
+    music_genre: str = Form(""),
+    origin_country: str = Form(""),
+    tempo_rhythm: str = Form(""),
+    main_instrument: str = Form(""),
+    ai_mood: str = Form(""),
+    ai_instruments: str = Form(""),
+    ai_tags: str = Form(""),
+    ai_description: str = Form(""),
+    origin: str = Form(...),
+    copyright: str = Form(...),
+    is_orchestrated: Optional[str] = Form(None),
+    has_vocals: Optional[str] = Form(None),
+    db: Session = Depends(database.get_db)
+):
+    # 🛑 THE INVISIBLE VAULT DOOR
+    if not request.session.get("is_admin"):
+        return RedirectResponse(url="/", status_code=303)
+
+    sound = db.query(models.Sound).filter(models.Sound.id == sound_id).first()
+
+    if sound:
+        sound.title = title.strip()
+        sound.acoustic_type = acoustic_type.strip()
+        sound.music_genre = music_genre.strip()
+        sound.origin_country = origin_country.strip()
+        sound.tempo_rhythm = tempo_rhythm.strip()
+        sound.main_instrument = main_instrument.strip()
+        sound.ai_mood = ai_mood.strip()
+        sound.ai_instruments = ai_instruments.strip()
+        sound.ai_tags = ai_tags.strip()
+        sound.ai_description = ai_description.strip()
+
+        sound.is_royalty_free = (copyright == "free")
+        sound.is_ai_generated = (origin == "ai")
+        sound.is_environmental = (origin == "nature")
+
+        # Checkboxes are absent from form data entirely when unchecked
+        sound.is_orchestrated = is_orchestrated is not None
+        sound.has_vocals = has_vocals is not None
+
+        try:
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            print(f"Error: failed to update sound {sound_id}: {e}")
+
     return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.get("/login")

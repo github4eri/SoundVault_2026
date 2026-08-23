@@ -8,7 +8,7 @@
 
     <script>
         window.toggleModal = function() {
-            console.log("!!! TRIGGER DETECTED !!!"); 
+            console.log("!!! TRIGGER DETECTED !!!");
             const modal = document.getElementById('uploadModal');
             if (modal) {
                 modal.classList.toggle('hidden');
@@ -18,86 +18,110 @@
                 alert("Architect: The ID 'uploadModal' is missing from the page!");
             }
         };
+
+        window.toggleEditModal = function(id) {
+            const modal = document.getElementById('editModal-' + id);
+            if (modal) {
+                modal.classList.toggle('hidden');
+                const isHidden = modal.classList.contains('hidden');
+                document.body.style.overflow = isHidden ? 'auto' : 'hidden';
+            } else {
+                alert("Architect: The edit modal for sound #" + id + " is missing from the page!");
+            }
+        };
+
+        window.toggleClamp = function(elId) {
+            const el = document.getElementById(elId);
+            if (!el) return;
+            const btn = document.getElementById(el.dataset.clampBtn);
+            const isClamped = el.classList.toggle(el.dataset.clamp);
+            if (btn) btn.textContent = isClamped ? '... More' : 'Less';
+        };
+
+        // Only offer the More toggle on text that is actually cut off
+        window.addEventListener('load', function() {
+            document.querySelectorAll('[data-clamp-btn]').forEach(function(el) {
+                const btn = document.getElementById(el.dataset.clampBtn);
+                if (btn && el.scrollHeight > el.clientHeight + 1) {
+                    btn.classList.remove('hidden');
+                }
+            });
+        });
     </script>
         
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-8">
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-7xl mx-auto">
         
         {% include 'components/header.html' %}
     
-        <div class="flex items-center justify-start gap-3 mb-8 border-b border-slate-700/50 pb-6">
+        <div class="flex items-center justify-between gap-3 mb-6 border-b border-slate-700/50 pb-4">
             <div class="flex bg-slate-900/50 p-1 rounded-lg border border-slate-700">
-                <a href="/?lang=en" 
-                   class="px-4 py-1.5 rounded-md text-[10px] font-black transition-all 
+                <a href="/?lang=en"
+                   class="px-4 py-1.5 rounded-md text-[10px] font-black transition-all
                    {{ 'bg-cyan-500 text-slate-900 shadow-[0_0_15px_rgba(6,182,212,0.4)]' if current_lang == 'en' else 'text-slate-500 hover:text-slate-300' }}">
                    EN
                 </a>
-                
-                <a href="/?lang=jp" 
-                   class="px-4 py-1.5 rounded-md text-[10px] font-black transition-all 
+
+                <a href="/?lang=jp"
+                   class="px-4 py-1.5 rounded-md text-[10px] font-black transition-all
                    {{ 'bg-cyan-500 text-slate-900 shadow-[0_0_15px_rgba(6,182,212,0.4)]' if current_lang == 'jp' else 'text-slate-500 hover:text-slate-300' }}">
                    JP
                 </a>
             </div>
+
+            {% if is_admin %}
+            <div class="flex items-center gap-3">
+                <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+                    Admin
+                </span>
+
+                <a href="/logout"
+                    class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-400 transition-all">
+                    Logout
+                </a>
+            </div>
+            {% endif %}
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
             {% include 'components/aside.html' %}
-        
-            <main class="md:col-span-3">
+
+            <main class="md:col-span-4">
                 
                 
                 
 
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
-    
-                    <div>
-                        <h2 class="text-3xl font-black text-white tracking-tighter mb-1">
-                            {{ labels.modal_title }}
+                <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-700/50 pb-4">
+
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-2xl font-black text-slate-100 tracking-tight">
+                            {{ labels.sound_library }}
                         </h2>
-                        
+
+                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-900 border border-slate-700/50 rounded-lg shadow-inner cursor-default">
+                            <span class="text-cyan-400 text-sm">📻</span>
+                            <span class="text-white font-bold text-sm">{{ sounds|length }}</span>
+                            <span class="text-slate-400 text-[10px] uppercase tracking-widest font-medium">Tracks in Vault</span>
+                        </div>
                     </div>
-                   
+
                     {% if is_admin %}
-                    <div class="flex items-center gap-3">
-                        <button type="button"
-                            onclick="toggleModal()"
-                            class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-6 py-3 rounded-xl transition-all flex items-center justify-center gap-3 active:scale-95">
+                    <button type="button"
+                        onclick="toggleModal()"
+                        class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-5 py-2.5 rounded-xl transition-all flex items-center justify-center gap-3 active:scale-95">
 
                         <span class="text-cyan-400 text-lg font-bold leading-none">+</span>
 
                         <span class="text-[10px] font-black uppercase tracking-widest leading-none">
                             {{ labels.upload_btn }}
                         </span>
-                        </button>
-
-                        <a href="/logout"
-                            class="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-400 transition-all px-3">
-                            Logout
-                        </a>
-                    </div>
+                    </button>
                     {% endif %}
                 </div>
 
-                <div class="mb-8 flex items-center justify-between border-b border-slate-700/50 pb-4">
-                    <div>
-                        <h2 class="text-2xl font-black text-slate-100 tracking-tight">
-                            {{ labels.sound_library }}
-                        </h2>
-                        
-                    </div>
-                    
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-900 border border-slate-700/50 rounded-lg shadow-inner cursor-default">
-                        <span class="text-cyan-400 text-sm">📻</span>
-                        <span class="text-white font-bold text-sm">{{ sounds|length }}</span> 
-                        <span class="text-slate-400 text-xs uppercase tracking-widest font-medium">Tracks in Vault</span>
-                    </div>
-                </div>
-
                 <section>
-                    <h2 class="text-2xl font-bold mb-6">{{ labels.collection_title }}</h2>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">  
                         
                         {% for sound in sounds %} 
@@ -111,30 +135,59 @@
                                     </span>
                                     
                                     {% if is_admin %}
-                                    <form action="/delete/{{ sound.id }}" method="post" class="inline">
-                                        <button type="submit" onclick="return confirm('Are you sure you want to delete this sound?')" class="text-[10px] text-red-500 hover:text-red-400 font-bold">
-                                            [DELETE]
+                                    <div class="flex items-center gap-3">
+                                        <button type="button"
+                                            onclick="toggleEditModal({{ sound.id }})"
+                                            class="text-[10px] text-cyan-400 hover:text-cyan-300 font-bold">
+                                            [EDIT]
                                         </button>
-                                    </form>
+                                        <form action="/delete/{{ sound.id }}" method="post" class="inline">
+                                            <button type="submit" onclick="return confirm('Are you sure you want to delete this sound?')" class="text-[10px] text-red-500 hover:text-red-400 font-bold">
+                                                [DELETE]
+                                            </button>
+                                        </form>
+                                    </div>
                                     {% endif %}
                                 </div>
-                                <h3 class="text-lg font-bold leading-tight">{{ sound.title }}</h3>
+                                <div class="flex items-baseline gap-2">
+                                    <h3 id="title-{{ sound.id }}"
+                                        data-clamp="line-clamp-1"
+                                        data-clamp-btn="titleBtn-{{ sound.id }}"
+                                        class="flex-1 min-w-0 text-lg font-bold leading-tight line-clamp-1">{{ sound.title }}</h3>
+                                    <button type="button"
+                                        id="titleBtn-{{ sound.id }}"
+                                        onclick="toggleClamp('title-{{ sound.id }}')"
+                                        class="hidden shrink-0 text-[10px] text-cyan-400 hover:text-cyan-300 font-bold uppercase tracking-widest">
+                                        ... More
+                                    </button>
+                                </div>
                             </div>
                 
                             <div class="flex-grow flex flex-col gap-2 mb-3">
-                                <p class="text-sm text-slate-400 line-clamp-2">"{{ sound.ai_description }}"</p>
-                                
-                                <div class="flex flex-wrap gap-1.5 mt-1">
-                                    <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-tighter {{ 'bg-indigo-900 text-indigo-300' if sound.is_ai_generated else 'bg-emerald-900 text-emerald-300' }}">
+                                <div class="flex items-end gap-2">
+                                    <p id="desc-{{ sound.id }}"
+                                        data-clamp="line-clamp-2"
+                                        data-clamp-btn="descBtn-{{ sound.id }}"
+                                        class="flex-1 min-w-0 text-sm text-slate-400 line-clamp-2">"{{ sound.ai_description }}"</p>
+                                    <button type="button"
+                                        id="descBtn-{{ sound.id }}"
+                                        onclick="toggleClamp('desc-{{ sound.id }}')"
+                                        class="hidden shrink-0 text-[10px] text-cyan-400 hover:text-cyan-300 font-bold uppercase tracking-widest">
+                                        ... More
+                                    </button>
+                                </div>
+
+                                <div class="flex overflow-x-auto whitespace-nowrap gap-1.5 mt-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                                    <span class="shrink-0 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-tighter {{ 'bg-indigo-900 text-indigo-300' if sound.is_ai_generated else 'bg-emerald-900 text-emerald-300' }}">
                                         {{ 'AI Synthesized' if sound.is_ai_generated else 'Human Original' }}
                                     </span>
-                                    
-                                    <span class="bg-slate-900 text-slate-400 px-2 py-0.5 rounded text-[9px] border border-slate-700">
+
+                                    <span class="shrink-0 bg-slate-900 text-slate-400 px-2 py-0.5 rounded text-[9px] border border-slate-700">
                                         🌍 {{ sound.origin_country or 'Unknown' }}
                                     </span>
-                                    
+
                                     {% if sound.music_genre and sound.music_genre.lower() != 'none' %}
-                                    <span class="bg-slate-900 text-cyan-400 px-2 py-0.5 rounded text-[9px] border border-cyan-900/50">
+                                    <span class="shrink-0 bg-slate-900 text-cyan-400 px-2 py-0.5 rounded text-[9px] border border-cyan-900/50">
                                         🎸 {{ sound.music_genre }}
                                     </span>
                                     {% endif %}
@@ -165,7 +218,11 @@
                             </div>
                             
                         </div>
-                        
+
+                        {% if is_admin %}
+                        {% include 'components/edit_modal.html' %}
+                        {% endif %}
+
                         {% endfor %}
                         
                     </div>
